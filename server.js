@@ -14,9 +14,23 @@ const Notification = require('./models/Notification');
 const app  = express();
 const port = process.env.PORT || 4000;
 
-// 3) CORS 설정: 프론트 ngrok URL 또는 '*' (개발용)
-const corsOrigin = process.env.CORS_ORIGIN || '*';
-app.use(cors({ origin: corsOrigin, credentials: true }));
+// 3) CORS 설정: 허용할 프론트엔드 주소 명시
+const allowedOrigins = [
+  'https://fanapp1.vercel.app',  // 배포된 프론트 주소
+  'http://localhost:3000'        // 개발용 로컬 주소
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // origin이 없으면 (예: Postman 등) 허용
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS 차단됨: ${origin}`));
+    }
+  },
+  credentials: true
+}));
 
 // 4) JSON 바디 파싱
 app.use(express.json());
